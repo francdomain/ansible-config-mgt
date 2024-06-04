@@ -1,0 +1,22 @@
+---
+- name: Update web, NFS, and DB servers
+  hosts: webservers, nfs
+  become: true
+  tasks:
+    - name: Ensure wireshark is at the latest version
+      yum:
+        name: wireshark
+        state: latest
+
+- name: Update LB server
+  hosts: lb, db
+  become: true
+  tasks:
+    - name: Update apt repo
+      apt:
+        update_cache: yes
+
+    - name: Ensure wireshark is at the latest version
+      apt:
+        name: wireshark
+        state: latest
