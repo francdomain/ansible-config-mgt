@@ -1,5 +1,8 @@
-uat-webservers:
-  - 172.31.35.223:
-      ansible_ssh_user: "ec2-user"
-  - 172.31.34.101:
-      ansible_ssh_user: "ec2-user"
+all:
+  children:
+    uat-webservers:
+      hosts:
+        172.31.35.223:
+          ansible_user: ec2-user
+        172.31.34.101:
+          ansible_user: ec2-user
