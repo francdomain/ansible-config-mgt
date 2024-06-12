@@ -1,3 +1,8 @@
+[lb]
+nginx_lb ansible_host=172.31.6.105
+
+
 [uat-webservers]
 172.31.35.223 ansible_ssh_user='ec2-user'
 172.31.34.101 ansible_ssh_user='ec2-user'
+

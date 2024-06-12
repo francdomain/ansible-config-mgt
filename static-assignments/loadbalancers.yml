@@ -1,0 +1,30 @@
+---
+- hosts: lb
+  become: yes
+  roles:
+    - role: nginx
+      when: enable_nginx_lb and load_balancer_is_required
+    - role: apache
+      when: enable_apache_lb and load_balancer_is_required
+
+  roles:
+    - role: nginx
+      vars:
+        nginx_conf_template: "templates/nginx.conf.j2"
+        nginx_vhost_template: "templates/vhost.j2"
+        nginx_upstreams:
+          - name: myproject
+            strategy: ip_hash
+            keepalive: 16
+            servers:
+              - "172.31.35.223 weight=5"
+              - "172.31.34.101 weight=5"
+        nginx_vhosts:
+          - listen: "80"
+            server_name: "example.com"
+            root: "/var/www/html"
+            index: "index.php index.html index.htm"
+            locations:
+              - path: "/"
+                proxy_pass: "http://myproject"
+
