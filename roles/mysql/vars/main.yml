@@ -1,4 +1,4 @@
-# roles/geerlingguy.mysql/vars/main.yml
+# roles/mysql/vars/main.yml
 
 mysql_root_password: ""
 mysql_databases:
