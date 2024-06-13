@@ -13,3 +13,5 @@
 
 - import_playbook: ../static-assignments/loadbalancers.yml
 
+- import_playbook: ../static-assignments/db-servers.yml
+
