@@ -15,7 +15,12 @@
   when: apache_packages is not defined
 
 # Setup/install tasks.
-- include_tasks: "setup-{{ ansible_os_family }}.yml"
+- name: Setup/install tasks.
+  include_tasks: "setup-{{ ansible_os_family }}.yml"
+
+  vars:
+     ansible_become: true
+  when: enable_apache_lb
 
 # Figure out what version of Apache is installed.
 - name: Get installed version of Apache.
@@ -45,3 +50,5 @@
     name: "{{ apache_service }}"
     state: "{{ apache_state }}"
     enabled: "{{ apache_enabled }}"
+  become: yes
+  when: enable_apache_lb

@@ -1,5 +1,6 @@
 [lb]
-nginx_lb ansible_host=172.31.6.105
+172.31.6.105 ansible_ssh_user='ubuntu'
+
 
 
 [uat_webservers]
