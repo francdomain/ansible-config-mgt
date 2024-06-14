@@ -81,6 +81,7 @@ http {
         server_name {{ vhost.server_name }};
         root {{ vhost.root }};
         index {{ vhost.index }};
+        {# filename {{ vhost.filename }}; #}
 
     {% for location in vhost.locations %}
         location {{ location.path }} {
