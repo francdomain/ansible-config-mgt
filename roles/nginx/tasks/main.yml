@@ -1,13 +1,18 @@
 ---
-- name: Ensure dirmngr is installed (gnupg dependency)
-  apt:
-    name: dirmngr
-    state: present
-  become: yes
-
 # Variable setup.
 - name: Include OS-specific variables.
   include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Check if Apache is running
+  ansible.builtin.service_facts:
+
+- name: Stop and disable Apache if it is running
+  ansible.builtin.service:
+    name: apache2
+    state: stopped
+    enabled: no
+  when: "'apache2' in services and services['apache2'].state == 'running'"
+  become: yes
 
 - name: Define nginx_user.
   set_fact:
@@ -20,6 +25,10 @@
 
 - include_tasks: setup-Ubuntu.yml
   when: ansible_distribution == 'Ubuntu'
+
+  vars:
+
+     ansible_become: true
 
 - include_tasks: setup-Debian.yml
   when: ansible_os_family == 'Debian'
@@ -49,9 +58,11 @@
     mode: 0644
   notify:
     - reload nginx
+  become: yes
 
 - name: Ensure nginx service is running as configured.
   service:
     name: nginx
     state: "{{ nginx_service_state }}"
     enabled: "{{ nginx_service_enabled }}"
+  become: yes
