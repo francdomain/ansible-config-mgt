@@ -17,6 +17,7 @@
 - name: Define nginx_user.
   set_fact:
     nginx_user: "{{ __nginx_user }}"
+  become: yes
   when: nginx_user is not defined
 
 # Setup/install tasks.
@@ -27,7 +28,6 @@
   when: ansible_distribution == 'Ubuntu'
 
   vars:
-
      ansible_become: true
 
 - include_tasks: setup-Debian.yml
