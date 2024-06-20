@@ -9,9 +9,11 @@
 
 # - import_playbook: ../static-assignments/common.yml
 
-- import_playbook: ../static-assignments/uat-webservers.yml
+- name: tooling assignment
+  import_playbook: ../static-assignments/uat-webservers.yml
 
-- import_playbook: ../static-assignments/loadbalancers.yml
+- name: nginx assignment
+  import_playbook: ../static-assignments/loadbalancers.yml
 
-- import_playbook: ../static-assignments/db-servers.yml
-
+- name: Database assignment
+  import_playbook: ../static-assignments/db-servers.yml

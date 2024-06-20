@@ -75,8 +75,8 @@ nginx_vhosts:
     index: "index.php index.html index.htm" # default: "index.html index.htm"
     # filename: "www.example.com.conf" # Can be used to set the vhost filename.
     locations:
-              - path: "/"
-                proxy_pass: "http://myapp1"
+      - path: "/"
+        proxy_pass: "http://myapp1"
 
     # Properties that are only added if defined:
     server_name_redirect: "www.example.com" # default: N/A
@@ -87,14 +87,13 @@ nginx_vhosts:
     template: "{{ nginx_vhost_template }}" # Can be used to override the `nginx_vhost_template` per host.
     state: "present" # To remove the vhost configuration.
 
-
 nginx_upstreams:
-- name: myapp1
-  strategy: "ip_hash" # "least_conn", etc.
-  keepalive: 16 # optional
-  servers:
-    - "172.31.35.223 weight=5"
-    - "172.31.34.101 weight=5"
+  - name: myapp1
+    strategy: "ip_hash" # "least_conn", etc.
+    keepalive: 16 # optional
+    servers:
+      - "172.31.81.236 weight=5"
+      - "172.31.85.118 weight=5"
 
 nginx_log_format: |-
   '$remote_addr - $remote_user [$time_local] "$request" '
