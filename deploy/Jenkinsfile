@@ -24,8 +24,12 @@ pipeline {
             steps {
                 sh 'echo ${WORKSPACE}'
                 sh 'sed -i "3 a roles_path=${WORKSPACE}/roles" ${WORKSPACE}/deploy/ansible.cfg'
-                // Properly append the ssh_connection configuration
-                sh 'echo -e "\\n[ssh_connection]\\nprivate_key_file = /home/ubuntu/private_key.pem" >> ${WORKSPACE}/deploy/ansible.cfg'
+                // Conditionally append the ssh_connection configuration if it does not already exist
+                sh '''
+                if ! grep -q "\\[ssh_connection\\]" ${WORKSPACE}/deploy/ansible.cfg; then
+                    echo -e "\\n[ssh_connection]\\nprivate_key_file = /home/ubuntu/my-ec2-key.pem" >> ${WORKSPACE}/deploy/ansible.cfg
+                fi
+                '''
             }
         }
 
