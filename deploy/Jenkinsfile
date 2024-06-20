@@ -24,12 +24,14 @@ pipeline {
             steps {
                 sh 'echo ${WORKSPACE}'
                 sh 'sed -i "3 a roles_path=${WORKSPACE}/roles" ${WORKSPACE}/deploy/ansible.cfg'
+                // Ensure the private_key_file path is correctly set
+                sh 'echo -e "[ssh_connection]\\nprivate_key_file = /home/ubuntu/my-ec2-key.pem" >> ${WORKSPACE}/deploy/ansible.cfg'
             }
         }
 
         stage('Run Ansible playbook') {
             steps {
-                ansiblePlaybook become: true, credentialsId: 'private-key', disableHostKeyChecking: true, installation: 'ansible', inventory: 'inventory/dev.yml', playbook: 'playbooks/site.yml'
+                ansiblePlaybook become: true, disableHostKeyChecking: true, installation: 'ansible', inventory: 'inventory/dev.yml', playbook: 'playbooks/site.yml'
             }
         }
 
