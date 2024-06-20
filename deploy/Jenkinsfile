@@ -27,7 +27,7 @@ pipeline {
                 // Conditionally append the ssh_connection configuration if it does not already exist
                 sh '''
                 if ! grep -q "\\[ssh_connection\\]" ${WORKSPACE}/deploy/ansible.cfg; then
-                    echo -e "\\n[ssh_connection]\\nprivate_key_file = /home/ubuntu/my-ec2-key.pem\\nssh_args = -o StrictHostKeyChecking=no" >> ${WORKSPACE}/deploy/ansible.cfg
+                    echo -e "\\n[ssh_connection]\\nprivate_key_file = my-ec2-key.pem\\nssh_args = -o StrictHostKeyChecking=no" >> ${WORKSPACE}/deploy/ansible.cfg
                 fi
                 '''
             }
