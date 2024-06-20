@@ -21,23 +21,34 @@ pipeline {
         }
 
         stage('Prepare Ansible For Execution') {
-            steps {
-                sh 'echo ${WORKSPACE}'
-                sh 'sed -i "3 a roles_path=${WORKSPACE}/roles" ${WORKSPACE}/deploy/ansible.cfg'
-                // Only add the ssh_connection section if it doesn't exist
-                sh '''
-                if ! grep -q "\\[ssh_connection\\]" ${WORKSPACE}/deploy/ansible.cfg; then
-                    echo -e "\\n[ssh_connection]\\nprivate_key_file = /home/ubuntu/.ssh/my-ec2-key.pem\\nssh_args = -o StrictHostKeyChecking=no" >> ${WORKSPACE}/deploy/ansible.cfg
-                fi
-                '''
-            }
+      steps {
+        sh 'echo ${WORKSPACE}'
+        sh 'sed -i "3 a roles_path=${WORKSPACE}/roles" ${WORKSPACE}/deploy/ansible.cfg'
+      }
+    }
+
+    stage('Test SSH Connection') {
+      steps {
+        sshagent(['private-key']) {
+          sh 'ssh -o StrictHostKeyChecking=no -i /home/ubuntu/.ssh/my-ec2-key.pem ubuntu@172.31.92.10 exit'
         }
+      }
+    }
 
         stage('Run Ansible playbook') {
-            steps {
-                ansiblePlaybook become: true, disableHostKeyChecking: true, installation: 'ansible', inventory: 'inventory/dev.yml', playbook: 'playbooks/site.yml'
-            }
+      steps {
+        sshagent(['private-key']) {
+          ansiblePlaybook(
+            become: true,
+            credentialsId: 'private-key',
+            disableHostKeyChecking: true,
+            installation: 'ansible',
+            inventory: "${WORKSPACE}/inventory/dev.yml",
+            playbook: "${WORKSPACE}/playbooks/site.yml"
+          )
         }
+      }
+    }
 
         stage('Clean Workspace after build') {
             steps {
