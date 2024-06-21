@@ -30,16 +30,16 @@ pipeline {
         stage('Test SSH Connections') {
             steps {
                 script {
-                    def hosts = [
-                        [host: '172.31.89.253', user: 'ubuntu'],
-                        [host: '172.31.81.236', user: 'ec2-user'],
-                        [host: '172.31.85.118', user: 'ec2-user'],
-                        [host: '172.31.91.227', user: 'ubuntu']
+                    def allHosts = [
+                        'ubuntu@172.31.89.253',
+                        'ubuntu@172.31.91.227',
+                        'ec2-user@172.31.81.236',
+                        'ec2-user@172.31.85.118'
                     ]
 
                     sshagent(['private-key']) {
-                        hosts.each { h ->
-                            sh "ssh -o StrictHostKeyChecking=no -i /home/ubuntu/.ssh/my-ec2-key.pem ${h.user}@${h.host} exit"
+                        allHosts.each { host ->
+                            sh "ssh -o StrictHostKeyChecking=no ${host} exit"
                         }
                     }
                 }
@@ -54,16 +54,10 @@ pipeline {
                         credentialsId: 'private-key',
                         disableHostKeyChecking: true,
                         installation: 'ansible',
-                        inventory: "${WORKSPACE}/inventory/dev.yml",
-                        playbook: "${WORKSPACE}/playbooks/site.yml"
+                        inventory: 'deploy/inventory.ini',
+                        playbook: 'deploy/playbook.yml'
                     )
                 }
-            }
-        }
-
-        stage('Clean Workspace after build') {
-            steps {
-                cleanWs(cleanWhenAborted: true, cleanWhenFailure: true, cleanWhenNotBuilt: true, cleanWhenUnstable: true, deleteDirs: true)
             }
         }
     }
