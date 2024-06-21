@@ -11,9 +11,15 @@
 
 - name: tooling assignment
   import_playbook: ../static-assignments/uat-webservers.yml
+  tags:
+    - webservers
 
 - name: Nginx assignment
   import_playbook: ../static-assignments/loadbalancers.yml
+  tags:
+    - nginx_lb
 
 - name: Database assignment
   import_playbook: ../static-assignments/db-servers.yml
+  tags:
+    - db
