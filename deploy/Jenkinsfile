@@ -1,79 +1,3 @@
-// pipeline {
-//     agent any
-
-//     environment {
-//         ANSIBLE_CONFIG = "${WORKSPACE}/deploy/ansible.cfg"
-//     }
-
-//     parameters {
-//       string(name: 'inventory', defaultValue: 'dev',  description: 'This is the inventory file for the environment to deploy configuration')
-//     }
-
-//     stages {
-//         stage('Initial cleanup') {
-//             steps {
-//                 dir("${WORKSPACE}") {
-//                     deleteDir()
-//                 }
-//             }
-//         }
-
-//         stage('Checkout SCM') {
-//             steps {
-//                 git branch: 'main', url: 'https://github.com/francdomain/ansible-config-mgt.git'
-//             }
-//         }
-
-//         stage('Prepare Ansible For Execution') {
-//             steps {
-//                 sh 'echo ${WORKSPACE}'
-//                 sh 'sed -i "3 a roles_path=${WORKSPACE}/roles" ${WORKSPACE}/deploy/ansible.cfg'
-//             }
-//         }
-
-//         stage('Test SSH Connections') {
-//             steps {
-//                 script {
-//                     def allHosts = [
-//                         'ubuntu@172.31.89.253',
-//                         'ubuntu@172.31.91.227',
-//                         'ec2-user@172.31.81.236',
-//                         'ec2-user@172.31.85.118'
-//                     ]
-
-//                     sshagent(['private-key']) {
-//                         allHosts.each { host ->
-//                             sh "ssh -o StrictHostKeyChecking=no ${host} exit"
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-
-//         stage('Run Ansible playbook') {
-//             steps {
-//                 sshagent(['private-key']) {
-//                     ansiblePlaybook(
-//                         become: true,
-//                         credentialsId: 'private-key',
-//                         disableHostKeyChecking: true,
-//                         installation: 'ansible',
-//                         inventory: '${WORKSPACE}/inventory/${inventory}',
-//                         playbook: '${WORKSPACE}/playbooks/site.yml'
-//                     )
-//                 }
-//             }
-//         }
-
-//         stage('Clean Workspace after build') {
-//             steps {
-//                 cleanWs(cleanWhenAborted: true, cleanWhenFailure: true, cleanWhenNotBuilt: true, cleanWhenUnstable: true, deleteDirs: true)
-//             }
-//         }
-//     }
-// }
-
-
 pipeline {
     agent any
 
@@ -82,12 +6,7 @@ pipeline {
     }
 
     parameters {
-        string(name: 'inventory', defaultValue: 'dev', description: 'This is the inventory file for the environment to deploy configuration')
-        string(name: 'branch', defaultValue: 'main', description: 'Branch to checkout')
-        string(name: 'repo_url', defaultValue: 'https://github.com/francdomain/ansible-config-mgt.git', description: 'Repository URL')
-        text(name: 'ssh_hosts', defaultValue: 'ubuntu@172.31.89.253\nubuntu@172.31.91.227\nec2-user@172.31.81.236\nec2-user@172.31.85.118', description: 'List of SSH hosts, one per line')
-        string(name: 'playbook_path', defaultValue: '${WORKSPACE}/playbooks/site.yml', description: 'Path to the Ansible playbook')
-        string(name: 'credentials_id', defaultValue: 'private-key', description: 'Credentials ID for SSH and Ansible')
+      string(name: 'inventory', defaultValue: 'dev',  description: 'This is the inventory file for the environment to deploy configuration')
     }
 
     stages {
@@ -101,7 +20,7 @@ pipeline {
 
         stage('Checkout SCM') {
             steps {
-                git branch: "${params.branch}", url: "${params.repo_url}"
+                git branch: 'main', url: 'https://github.com/francdomain/ansible-config-mgt.git'
             }
         }
 
@@ -115,9 +34,14 @@ pipeline {
         stage('Test SSH Connections') {
             steps {
                 script {
-                    def allHosts = params.ssh_hosts.split('\n')
+                    def allHosts = [
+                        'ubuntu@172.31.89.253',
+                        'ubuntu@172.31.91.227',
+                        'ec2-user@172.31.81.236',
+                        'ec2-user@172.31.85.118'
+                    ]
 
-                    sshagent([params.credentials_id]) {
+                    sshagent(['private-key']) {
                         allHosts.each { host ->
                             sh "ssh -o StrictHostKeyChecking=no ${host} exit"
                         }
@@ -128,14 +52,14 @@ pipeline {
 
         stage('Run Ansible playbook') {
             steps {
-                sshagent([params.credentials_id]) {
+                sshagent(['private-key']) {
                     ansiblePlaybook(
                         become: true,
-                        credentialsId: params.credentials_id,
+                        credentialsId: 'private-key',
                         disableHostKeyChecking: true,
                         installation: 'ansible',
-                        inventory: "${WORKSPACE}/inventory/${params.inventory}",
-                        playbook: params.playbook_path
+                        inventory: '${WORKSPACE}/inventory/${inventory}',
+                        playbook: '${WORKSPACE}/playbooks/site.yml'
                     )
                 }
             }
