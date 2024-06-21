@@ -12,7 +12,7 @@
 - name: tooling assignment
   import_playbook: ../static-assignments/uat-webservers.yml
   tags:
-    - webservers
+    - webserver
 
 - name: Nginx assignment
   import_playbook: ../static-assignments/loadbalancers.yml
