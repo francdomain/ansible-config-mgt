@@ -1,0 +1,100 @@
+---
+- name: Install JFrog Artifactory and Configure Nginx
+  hosts: all
+  become: yes
+  tasks:
+    # - name: Install required packages (gnupg2, nginx and openjdk-17-jdk)
+    - name: Install required packages (gnupg2 and openjdk-17-jdk)
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - gnupg2
+        # - nginx
+        - openjdk-17-jdk
+      tags:
+        - packages
+
+    - name: Add JFrog Artifactory repository GPG key
+      apt_key:
+        url: https://api.bintray.com/orgs/jfrog/keys/gpg/public.key
+        state: present
+      tags:
+        - artifactory
+
+    - name: Add JFrog Artifactory repository
+      apt_repository:
+        repo: deb https://jfrog.bintray.com/artifactory-debs bionic main
+        state: present
+      tags:
+        - artifactory
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+      tags:
+        - artifactory
+
+    - name: Install JFrog Artifactory OSS
+      apt:
+        name: jfrog-artifactory-oss
+        state: present
+      tags:
+        - artifactory
+
+    - name: Start and enable Artifactory service
+      systemd:
+        name: artifactory
+        state: started
+        enabled: yes
+      tags:
+        - artifactory
+
+    # - name: Configure Nginx as a reverse proxy for JFrog Artifactory
+    #   template:
+    #     src: jfrog.conf.j2
+    #     dest: /etc/nginx/sites-available/jfrog.conf
+    #   notify:
+    #     - reload nginx
+    #   tags:
+    #     - nginx
+
+    # - name: Ensure Nginx site is enabled
+    #   file:
+    #     src: /etc/nginx/sites-available/jfrog.conf
+    #     dest: /etc/nginx/sites-enabled/jfrog.conf
+    #     state: link
+    #   notify:
+    #     - reload nginx
+    #   tags:
+    #     - nginx
+
+    - name: Set JAVA_HOME environment variable for Java 17
+      lineinfile:
+        path: /etc/environment
+        line: 'JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64'
+        create: yes
+      tags:
+        - java
+
+  # handlers:
+  #   - name: reload nginx
+  #     service:
+  #       name: nginx
+  #       state: reloaded
+
+
+
+
+
+# - name: Perform installation
+#   ansible.builtin.include_tasks: "install.yml"
+#   when:
+#     - artifactory_enabled
+#     - not artifactory_upgrade_only
+
+# - name: Perform upgrade
+#   ansible.builtin.include_tasks: "upgrade.yml"
+#   when:
+#     - artifactory_enabled
+#     - artifactory_upgrade_only
