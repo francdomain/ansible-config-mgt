@@ -20,8 +20,17 @@
 - debug:
     var: java_version.stderr_lines
 
+# - name: Add MariaDB repository
+#   command: curl -LsS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash -s --
+#   become: yes
+
 - name: Add MariaDB repository
-  command: curl -LsS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash -s --
+  ansible.builtin.shell: |
+    curl -LsS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash -s --
+  args:
+    warn: false
+  register: result
+  ignore_errors: yes
   become: yes
 
 - name: Update the repository cache after adding MariaDB repository
