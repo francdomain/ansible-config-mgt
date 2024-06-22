@@ -24,34 +24,34 @@
 #   command: curl -LsS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash -s --
 #   become: yes
 
-- name: Add MariaDB repository
-  ansible.builtin.shell: |
-    curl -LsS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash -s --
-  args:
-    warn: false
-  register: result
-  ignore_errors: yes
-  become: yes
+# - name: Add MariaDB repository
+#   ansible.builtin.shell: |
+#     curl -LsS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash -s --
+#   args:
+#     warn: false
+#   register: result
+#   ignore_errors: yes
+#   become: yes
 
-- name: Update the repository cache after adding MariaDB repository
-  apt:
-    update_cache: yes
-  become: yes
+# - name: Update the repository cache after adding MariaDB repository
+#   apt:
+#     update_cache: yes
+#   become: yes
 
-- name: Install MariaDB server and client
-  become: yes
-  apt:
-    name:
-      - mariadb-server
-      - mariadb-client
-    state: present
+# - name: Install MariaDB server and client
+#   become: yes
+#   apt:
+#     name:
+#       - mariadb-server
+#       - mariadb-client
+#     state: present
 
-- name: Start and enable MariaDB service
-  become: yes
-  systemd:
-    name: mariadb
-    state: started
-    enabled: yes
+# - name: Start and enable MariaDB service
+#   become: yes
+#   systemd:
+#     name: mariadb
+#     state: started
+#     enabled: yes
 
 - name: Add JFrog Artifactory repository to APT
   apt_repository:
@@ -96,38 +96,31 @@
   when: ansible_os_family == "Debian"
   become: yes
 
-- name: Create a database
-  mysql_db:
-    name: artifactory
-    state: present
-    login_user: root
-  become: yes
-
-- name: Import Artifactory data
-  shell: |
-    mysql -u root artifactory < /opt/jfrog/artifactory/app/misc/db/createdb_mariadb.sql
-  args:
-    executable: /bin/bash
-  become: yes
-
-- name: Confirm data import
-  mysql_db:
-    name: artifactory
-    state: present
-    login_user: root
-  register: result
-  become: yes
-
-- debug:
-    msg: "Database import successful"
-  when: result.changed
-
-# - name: Log in to the MariaDB shell and import Artifactory data
+# - name: Create a database
 #   mysql_db:
 #     name: artifactory
-#     state: import
-#     target: /opt/jfrog/artifactory/app/misc/db/createdb_mariadb.sql
+#     state: present
+#     login_user: root
 #   become: yes
+
+# - name: Import Artifactory data
+#   shell: |
+#     mysql -u root artifactory < /opt/jfrog/artifactory/app/misc/db/createdb_mariadb.sql
+#   args:
+#     executable: /bin/bash
+#   become: yes
+
+# - name: Confirm data import
+#   mysql_db:
+#     name: artifactory
+#     state: present
+#     login_user: root
+#   register: result
+#   become: yes
+
+# - debug:
+#     msg: "Database import successful"
+#   when: result.changed
 
 - name: Ensure the system.yaml file exists
   file:
