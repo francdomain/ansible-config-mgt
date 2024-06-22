@@ -3,7 +3,7 @@
 - name: Install JFrog Artifactory
   # hosts: all
   hosts: artifactory
-  become: yes
+  # become: yes
   tasks:
     # - name: Install required packages (gnupg2, nginx and openjdk-17-jdk)
     - name: Install required packages (gnupg2 and openjdk-17-jdk)
@@ -14,6 +14,7 @@
         - gnupg2
         # - nginx
         - openjdk-17-jdk
+      become: yes
       tags:
         - packages
 
