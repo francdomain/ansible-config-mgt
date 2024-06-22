@@ -1,103 +1,148 @@
+# tasks/main.yml
 ---
-  # - name: Install required packages (gnupg2, nginx and openjdk-17-jdk)
-- name: Install required packages (gnupg2 and openjdk-17-jdk)
+- name: Update and upgrade Ubuntu
   apt:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - gnupg2
-    # - nginx
-    - openjdk-17-jdk
+    update_cache: yes
+    upgrade: dist
   become: yes
-  tags:
-    - packages
 
-- name: Add JFrog Artifactory repository GPG key
-  apt_key:
-    url: https://api.bintray.com/orgs/jfrog/keys/gpg/public.key
-    state: present
+- name: Install Java JDK
   become: yes
-  tags:
-    - artifactory
-
-- name: Add JFrog Artifactory repository
-  apt_repository:
-    repo: deb https://jfrog.bintray.com/artifactory-debs bionic main
+  apt:
+    name: openjdk-17-jdk
     state: present
-  become: yes
-  tags:
-    - artifactory
 
-- name: Update apt cache
+- name: Check Java version
+  command: java -version
+  register: java_version
+  ignore_errors: yes
+
+- debug:
+    var: java_version.stderr_lines
+
+- name: Add MariaDB repository
+  command: curl -LsS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash -s --
+  become: yes
+
+- name: Update the repository cache after adding MariaDB repository
   apt:
     update_cache: yes
   become: yes
-  tags:
-    - artifactory
 
-- name: Install JFrog Artifactory OSS
+- name: Install MariaDB server and client
+  become: yes
+  apt:
+    name:
+      - mariadb-server
+      - mariadb-client
+    state: present
+
+- name: Start and enable MariaDB service
+  become: yes
+  systemd:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: Add JFrog Artifactory repository to APT
+  apt_repository:
+    repo: deb https://releases.jfrog.io/artifactory/artifactory-debs xenial main
+  become: yes
+
+- name: Add JFrog GPG key
+  command: curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/artifactory.gpg
+  become: yes
+
+- name: Update the repository cache after adding Artifactory repository
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: Install JFrog Artifactory
   apt:
     name: jfrog-artifactory-oss
     state: present
   become: yes
-  tags:
-    - artifactory
 
-- name: Start and enable Artifactory service
+- name: Start and enable JFrog Artifactory service
   systemd:
-    name: artifactory
+    name: artifactory.service
     state: started
     enabled: yes
   become: yes
-  tags:
-    - artifactory
 
-# - name: Configure Nginx as a reverse proxy for JFrog Artifactory
-#   template:
-#     src: jfrog.conf.j2
-#     dest: /etc/nginx/sites-available/jfrog.conf
-#   notify:
-#     - reload nginx
-#   tags:
-#     - nginx
-
-# - name: Ensure Nginx site is enabled
-#   file:
-#     src: /etc/nginx/sites-available/jfrog.conf
-#     dest: /etc/nginx/sites-enabled/jfrog.conf
-#     state: link
-#   notify:
-#     - reload nginx
-#   tags:
-#     - nginx
-
-- name: Set JAVA_HOME environment variable for Java 17
-  lineinfile:
-    path: /etc/environment
-    line: 'JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64'
-    create: yes
+- name: Verify the status of JFrog Artifactory
+  command: systemctl status artifactory.service
+  register: artifactory_status
+  ignore_errors: yes
   become: yes
-  tags:
-    - java
 
-# handlers:
-#   - name: reload nginx
-#     service:
-#       name: nginx
-#       state: reloaded
+- debug:
+    var: artifactory_status.stdout_lines
 
+- name: Ensure MySQL Python library is installed
+  apt:
+    name: python3-mysqldb
+    state: present
+  when: ansible_os_family == "Debian"
+  become: yes
 
+- name: Create a database
+  mysql_db:
+    name: artifactory
+    state: present
+    login_user: root
+  become: yes
 
+- name: Import Artifactory data
+  shell: |
+    mysql -u root artifactory < /opt/jfrog/artifactory/app/misc/db/createdb_mariadb.sql
+  args:
+    executable: /bin/bash
+  become: yes
 
+- name: Confirm data import
+  mysql_db:
+    name: artifactory
+    state: present
+    login_user: root
+  register: result
+  become: yes
 
-# - name: Perform installation
-#   ansible.builtin.include_tasks: "install.yml"
-#   when:
-#     - artifactory_enabled
-#     - not artifactory_upgrade_only
+- debug:
+    msg: "Database import successful"
+  when: result.changed
 
-# - name: Perform upgrade
-#   ansible.builtin.include_tasks: "upgrade.yml"
-#   when:
-#     - artifactory_enabled
-#     - artifactory_upgrade_only
+# - name: Log in to the MariaDB shell and import Artifactory data
+#   mysql_db:
+#     name: artifactory
+#     state: import
+#     target: /opt/jfrog/artifactory/app/misc/db/createdb_mariadb.sql
+#   become: yes
+
+- name: Ensure the system.yaml file exists
+  file:
+    path: /var/opt/jfrog/artifactory/etc/system.yaml
+    state: touch
+    owner: jfrog
+    group: jfrog
+    mode: '0644'
+  become: yes
+
+- name: Update allowNonPostgresql setting in system.yaml
+  blockinfile:
+    path: /var/opt/jfrog/artifactory/etc/system.yaml
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    block: |
+      allowNonPostgresql: true
+    owner: jfrog
+    group: jfrog
+    mode: '0644'
+  when: "'allowNonPostgresql: true' not in lookup('file', '/var/opt/jfrog/artifactory/etc/system.yaml')"
+  become: yes
+
+# - name: Tail the Artifactory service log
+#   command: tail -f /var/opt/jfrog/artifactory/log/artifactory-service.log
+#   async: 600
+#   poll: 0
+#   become: yes
