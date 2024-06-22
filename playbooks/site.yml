@@ -14,10 +14,10 @@
 #   tags:
 #     - webserver
 
-- name: Nginx assignment
-  import_playbook: ../static-assignments/loadbalancers.yml
-  tags:
-    - nginx_lb
+# - name: Nginx assignment
+#   import_playbook: ../static-assignments/loadbalancers.yml
+#   tags:
+#     - nginx_lb
 
 # - name: Database assignment
 #   import_playbook: ../static-assignments/db-servers.yml
