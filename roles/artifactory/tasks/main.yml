@@ -1,5 +1,6 @@
 ---
-- name: Install JFrog Artifactory and Configure Nginx
+# - name: Install JFrog Artifactory and Configure Nginx
+- name: Install JFrog Artifactory
   hosts: all
   become: yes
   tasks:
