@@ -55,7 +55,7 @@
 
 - name: Add JFrog GPG key
   ansible.builtin.shell: |
-    curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/artifactory.gpg
+    curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | gpg --dearmor -o /etc/apt/trusted.gpg.d/artifactory.gpg
   become: yes
 
 # - name: Add JFrog Artifactory repository to APT
