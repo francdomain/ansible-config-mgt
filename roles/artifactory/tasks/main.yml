@@ -148,8 +148,8 @@
   file:
     path: /var/opt/jfrog/artifactory/etc/system.yaml
     state: touch
-    owner: jfrog
-    group: jfrog
+    owner: artifactory
+    group: artifactory
     mode: '0644'
   become: yes
 
@@ -159,8 +159,8 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
     block: |
       allowNonPostgresql: true
-    owner: jfrog
-    group: jfrog
+    owner: artifactory
+    group: artifactory
     mode: '0644'
   when: "'allowNonPostgresql: true' not in lookup('file', '/var/opt/jfrog/artifactory/etc/system.yaml')"
   become: yes
