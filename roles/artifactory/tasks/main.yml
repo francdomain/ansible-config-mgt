@@ -20,39 +20,6 @@
 - debug:
     var: java_version.stderr_lines
 
-# - name: Add MariaDB repository
-#   command: curl -LsS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash -s --
-#   become: yes
-
-# - name: Add MariaDB repository
-#   ansible.builtin.shell: |
-#     curl -LsS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash -s --
-#   args:
-#     warn: false
-#   register: result
-#   ignore_errors: yes
-#   become: yes
-
-# - name: Update the repository cache after adding MariaDB repository
-#   apt:
-#     update_cache: yes
-#   become: yes
-
-# - name: Install MariaDB server and client
-#   become: yes
-#   apt:
-#     name:
-#       - mariadb-server
-#       - mariadb-client
-#     state: present
-
-# - name: Start and enable MariaDB service
-#   become: yes
-#   systemd:
-#     name: mariadb
-#     state: started
-#     enabled: yes
-
 # # - name: Add JFrog GPG key
 # #   ansible.builtin.shell: |
 # #     curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | gpg --dearmor -o /etc/apt/trusted.gpg.d/artifactory.gpg
