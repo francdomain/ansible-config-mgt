@@ -121,16 +121,26 @@
     mode: '0644'
   become: yes
 
+# - name: Update allowNonPostgresql setting in system.yaml
+#   blockinfile:
+#     path: /var/opt/jfrog/artifactory/etc/system.yaml
+#     marker: "# {mark} ANSIBLE MANAGED BLOCK"
+#     block: |
+#       allowNonPostgresql: true
+#     owner: artifactory
+#     group: artifactory
+#     mode: '0644'
+#   when: "'allowNonPostgresql: true' not in lookup('file', '/var/opt/jfrog/artifactory/etc/system.yaml')"
+#   become: yes
+
 - name: Update allowNonPostgresql setting in system.yaml
-  blockinfile:
+  lineinfile:
     path: /var/opt/jfrog/artifactory/etc/system.yaml
-    marker: "# {mark} ANSIBLE MANAGED BLOCK"
-    block: |
-      allowNonPostgresql: true
+    regexp: '^allowNonPostgresql:'
     owner: artifactory
     group: artifactory
     mode: '0644'
-  when: "'allowNonPostgresql: true' not in lookup('file', '/var/opt/jfrog/artifactory/etc/system.yaml')"
+    line: 'allowNonPostgresql: true'
   become: yes
 
 # - name: Tail the Artifactory service log
