@@ -53,25 +53,35 @@
 #     state: started
 #     enabled: yes
 
+# # - name: Add JFrog GPG key
+# #   ansible.builtin.shell: |
+# #     curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | gpg --dearmor -o /etc/apt/trusted.gpg.d/artifactory.gpg
+# #   become: yes
+
 # - name: Add JFrog GPG key
+#   command: curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/artifactory.gpg
+#   become: yes
+
+# # - name: Add JFrog Artifactory repository to APT
+# #   ansible.builtin.apt_repository:
+# #     repo: "deb https://releases.jfrog.io/artifactory/artifactory-debs xenial main"
+# #     state: present
+# #   become: yes
+
+# - name: Add JFrog Artifactory repository to APT
 #   ansible.builtin.shell: |
-#     curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | gpg --dearmor -o /etc/apt/trusted.gpg.d/artifactory.gpg
+#     echo "deb https://releases.jfrog.io/artifactory/artifactory-debs xenial main" >> /etc/apt/sources.list.d/artifactory.list
+#   register: artifactory_repo_result
 #   become: yes
 
 - name: Add JFrog GPG key
-  command: curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/artifactory.gpg
+  ansible.builtin.shell: |
+    curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | gpg --dearmor -o /usr/share/keyrings/jfrog-public.gpg
   become: yes
 
-# - name: Add JFrog Artifactory repository to APT
-#   ansible.builtin.apt_repository:
-#     repo: "deb https://releases.jfrog.io/artifactory/artifactory-debs xenial main"
-#     state: present
-#   become: yes
-
-- name: Add JFrog Artifactory repository to APT
+- name: Add JFrog repository
   ansible.builtin.shell: |
-    echo "deb https://releases.jfrog.io/artifactory/artifactory-debs xenial main" >> /etc/apt/sources.list.d/artifactory.list
-  register: artifactory_repo_result
+    echo "deb [signed-by=/usr/share/keyrings/jfrog-public.gpg] https://releases.jfrog.io/artifactory/artifactory-debs xenial main" | tee /etc/apt/sources.list.d/artifactory.list
   become: yes
 
 - name: Update the repository cache after adding Artifactory repository
