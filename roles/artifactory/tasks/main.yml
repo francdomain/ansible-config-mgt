@@ -58,10 +58,16 @@
     curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/artifactory.gpg
   become: yes
 
+# - name: Add JFrog Artifactory repository to APT
+#   ansible.builtin.apt_repository:
+#     repo: "deb https://releases.jfrog.io/artifactory/artifactory-debs xenial main"
+#     state: present
+#   become: yes
+
 - name: Add JFrog Artifactory repository to APT
   ansible.builtin.shell: |
-    echo "deb https://releases.jfrog.io/artifactory/artifactory-debs xenial main" | sudo tee -a /etc/apt/sources.list.d/artifactory.list
-    state: present
+    echo "deb https://releases.jfrog.io/artifactory/artifactory-debs xenial main" >> /etc/apt/sources.list.d/artifactory.list
+  register: artifactory_repo_result
   become: yes
 
 - name: Update the repository cache after adding Artifactory repository
