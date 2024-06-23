@@ -53,22 +53,24 @@
 #     state: started
 #     enabled: yes
 
-- name: Add JFrog Artifactory repository to APT
-  apt_repository:
-    repo: deb https://releases.jfrog.io/artifactory/artifactory-debs xenial main
+- name: Add JFrog GPG key
+  ansible.builtin.shell: |
+    curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/artifactory.gpg
   become: yes
 
-- name: Add JFrog GPG key
-  command: curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/artifactory.gpg
+- name: Add JFrog Artifactory repository to APT
+  ansible.builtin.shell: |
+    echo "deb https://releases.jfrog.io/artifactory/artifactory-debs xenial main" | sudo tee -a /etc/apt/sources.list.d/artifactory.list
+    state: present
   become: yes
 
 - name: Update the repository cache after adding Artifactory repository
-  apt:
+  ansible.builtin.apt:
     update_cache: yes
   become: yes
 
 - name: Install JFrog Artifactory
-  apt:
+  ansible.builtin.apt:
     name: jfrog-artifactory-oss
     state: present
   become: yes
@@ -89,12 +91,12 @@
 - debug:
     var: artifactory_status.stdout_lines
 
-- name: Ensure MySQL Python library is installed
-  apt:
-    name: python3-mysqldb
-    state: present
-  when: ansible_os_family == "Debian"
-  become: yes
+# - name: Ensure MySQL Python library is installed
+#   apt:
+#     name: python3-mysqldb
+#     state: present
+#   when: ansible_os_family == "Debian"
+#   become: yes
 
 # - name: Create a database
 #   mysql_db:
