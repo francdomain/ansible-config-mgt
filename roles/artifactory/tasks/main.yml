@@ -45,6 +45,7 @@
   ansible.builtin.shell: |
     curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | gpg --dearmor -o /usr/share/keyrings/jfrog-public.gpg
   become: yes
+  timeout: 60
 
 - name: Add JFrog repository
   ansible.builtin.shell: |
