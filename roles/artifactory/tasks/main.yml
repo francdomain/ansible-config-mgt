@@ -20,34 +20,12 @@
 - debug:
     var: java_version.stderr_lines
 
-# # - name: Add JFrog GPG key
-# #   ansible.builtin.shell: |
-# #     curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | gpg --dearmor -o /etc/apt/trusted.gpg.d/artifactory.gpg
-# #   become: yes
+- name: Add JFrog GPG key
+  ansible.builtin.shell: |
+    curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | gpg --dearmor -o /usr/share/keyrings/jfrog-public.gpg
+  become: yes
 
-# - name: Add JFrog GPG key
-#   command: curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/artifactory.gpg
-#   become: yes
-
-# # - name: Add JFrog Artifactory repository to APT
-# #   ansible.builtin.apt_repository:
-# #     repo: "deb https://releases.jfrog.io/artifactory/artifactory-debs xenial main"
-# #     state: present
-# #   become: yes
-
-# - name: Add JFrog Artifactory repository to APT
-#   ansible.builtin.shell: |
-#     echo "deb https://releases.jfrog.io/artifactory/artifactory-debs xenial main" >> /etc/apt/sources.list.d/artifactory.list
-#   register: artifactory_repo_result
-#   become: yes
-
-# - name: Add JFrog GPG key
-#   ansible.builtin.shell: |
-#     curl -fsSL https://releases.jfrog.io/artifactory/api/gpg/key/public | gpg --dearmor -o /usr/share/keyrings/jfrog-public.gpg
-#   become: yes
-#   timeout: 60
-
-- name: Add JFrog repository
+- name: Add JFrog repository to APT
   ansible.builtin.shell: |
     echo "deb [signed-by=/usr/share/keyrings/jfrog-public.gpg] https://releases.jfrog.io/artifactory/artifactory-debs xenial main" | tee /etc/apt/sources.list.d/artifactory.list
   become: yes
@@ -79,39 +57,6 @@
 - debug:
     var: artifactory_status.stdout_lines
 
-# - name: Ensure MySQL Python library is installed
-#   apt:
-#     name: python3-mysqldb
-#     state: present
-#   when: ansible_os_family == "Debian"
-#   become: yes
-
-# - name: Create a database
-#   mysql_db:
-#     name: artifactory
-#     state: present
-#     login_user: root
-#   become: yes
-
-# - name: Import Artifactory data
-#   shell: |
-#     mysql -u root artifactory < /opt/jfrog/artifactory/app/misc/db/createdb_mariadb.sql
-#   args:
-#     executable: /bin/bash
-#   become: yes
-
-# - name: Confirm data import
-#   mysql_db:
-#     name: artifactory
-#     state: present
-#     login_user: root
-#   register: result
-#   become: yes
-
-# - debug:
-#     msg: "Database import successful"
-#   when: result.changed
-
 - name: Ensure the system.yaml file exists
   file:
     path: /var/opt/jfrog/artifactory/etc/system.yaml
@@ -121,28 +66,6 @@
     mode: '0644'
   become: yes
 
-# - name: Update allowNonPostgresql setting in system.yaml
-#   blockinfile:
-#     path: /var/opt/jfrog/artifactory/etc/system.yaml
-#     marker: "# {mark} ANSIBLE MANAGED BLOCK"
-#     block: |
-#       allowNonPostgresql: true
-#     owner: artifactory
-#     group: artifactory
-#     mode: '0644'
-#   when: "'allowNonPostgresql: true' not in lookup('file', '/var/opt/jfrog/artifactory/etc/system.yaml')"
-#   become: yes
-
-# - name: Update allowNonPostgresql setting in system.yaml
-#   lineinfile:
-#     path: /var/opt/jfrog/artifactory/etc/system.yaml
-#     regexp: '^allowNonPostgresql:'
-#     owner: artifactory
-#     group: artifactory
-#     mode: '0644'
-#     line: 'allowNonPostgresql: true'
-#   become: yes
-
 - name: Update allowNonPostgresql setting in system.yaml
   lineinfile:
     path: /var/opt/jfrog/artifactory/etc/system.yaml
@@ -151,6 +74,12 @@
     group: artifactory
     insertafter: '^database:'
     line: '    allowNonPostgresql: true'
+  become: yes
+
+- name: Restart JFrog Artifactory service
+  service:
+    name: artifactory
+    state: restarted
   become: yes
 
 # - name: Tail the Artifactory service log
