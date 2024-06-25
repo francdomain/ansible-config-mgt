@@ -5,8 +5,8 @@
 # Web1 ansible_host=172.31.81.236 ansible_ssh_user='ec2-user'
 # Web2 ansible_host=172.31.85.118 ansible_ssh_user='ec2-user'
 
-# [todo]
-# <Todo-Web-Server-Private-IP-Address>
+[todo]
+<Todo-Web-Server-Private-IP-Address>
 
 # [db:vars]
 # ansible_user=ec2-user
