@@ -19,10 +19,10 @@
 #   tags:
 #     - nginx_lb
 
-# - name: Database assignment
-#   import_playbook: ../static-assignments/db-servers.yml
-#   tags:
-#     - db
+- name: Database assignment
+  import_playbook: ../static-assignments/db-servers.yml
+  tags:
+    - db
 
 # - name: Artifactory assignment
 #   import_playbook: ../static-assignments/artifactory.yml
