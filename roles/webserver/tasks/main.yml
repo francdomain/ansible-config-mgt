@@ -223,10 +223,23 @@
   remote_user: ec2-user
   become: true
   ansible.builtin.get_url:
-    url: http://52.90.135.43:8082/artifactory/Todo-artifact-local/php-todo.zip
+    url: http://44.204.92.144:8082/artifactory/Todo-artifact-local/php-todo.zip
     dest: /home/ec2-user/php-todo.zip
     url_username: admin
     url_password: Admin123$
+
+- name: Ensure unzip is installed
+  become: yes
+  ansible.builtin.yum:
+    name: unzip
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Unzip the artifacts
+  ansible.builtin.unarchive:
+    src: /home/ec2-user/php-todo.zip
+    dest: /var/www/html/
+    remote_src: yes
 
 # Unzip the artifacts
 - name: Unzip the artifacts
