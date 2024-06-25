@@ -279,6 +279,15 @@
     state: absent
   become: true
 
+# Remove Apache default welcome page on RedHat-based systems
+- name: Remove Apache default welcome page
+  remote_user: ec2-user
+  become: true
+  ansible.builtin.file:
+    path: /etc/httpd/conf.d/welcome.conf
+    state: absent
+  when: ansible_os_family == "RedHat"
+
 # Restart httpd
 - name: Restart httpd
   remote_user: ec2-user
