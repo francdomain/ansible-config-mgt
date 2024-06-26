@@ -1,135 +1,4 @@
-# # tasks file for webserver
-# ---
-# - name: install apache
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.yum:
-#     name: "httpd"
-#     state: present
-
-# - name: Enable apache
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.command:
-#     cmd: sudo systemctl enable httpd
-
-# - name: Install EPEL release
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.command:
-#     cmd: sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm -y
-
-# - name: Install dnf-utils and Remi repository
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.command:
-#     cmd: sudo dnf install dnf-utils http://rpms.remirepo.net/enterprise/remi-release-9.rpm -y
-
-# - name: Reset PHP module
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.command:
-#     cmd: sudo dnf module reset php -y
-
-# # - name: Enable PHP 8.2 module
-# - name: Enable PHP 7.4 module
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.command:
-#     cmd: sudo dnf module enable php:remi-7.4 -y
-
-# - name: Install PHP and extensions
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.yum:
-#     name:
-#       - php
-#       - php-opcache
-#       - php-gd
-#       - php-curl
-#       - php-mysqlnd
-#     state: present
-
-# - name: Install MySQL client
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.yum:
-#     name: "mysql"
-#     state: present
-
-# - name: Start PHP-FPM service
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.service:
-#     name: php-fpm
-#     state: started
-
-# - name: Enable PHP-FPM service
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.service:
-#     name: php-fpm
-#     enabled: true
-
-# - name: Set SELinux policies for web servers
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.command:
-#     cmd: sudo setsebool -P httpd_execmem 1
-#     cmd: sudo setsebool -P httpd_can_network_connect=1
-#     cmd: sudo setsebool -P httpd_can_network_connect_db=1
-
-# - name: install git
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.yum:
-#     name: "git"
-#     state: present
-
-# - name: clone a repo
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.git:
-#     repo: https://github.com/francdomain/tooling.git
-#     dest: /var/www/html
-#     force: yes
-
-# - name: copy html content to one level up
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   command: cp -r /var/www/html/html/ /var/www/
-
-# - name: Start service httpd, if not started
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.service:
-#     name: httpd
-#     state: started
-
-# - name: recursively remove /var/www/html/html/ directory
-#   remote_user: ec2-user
-#   become: true
-#   become_user: root
-#   ansible.builtin.file:
-#     path: /var/www/html/html
-#     state: absent
-
-
+# # tasks file for webserver - php-todo
 ---
 # Install Apache
 - name: Install Apache
@@ -310,3 +179,47 @@
   ansible.builtin.debug:
     msg: "{{ php_version.stdout }}"
 
+# Set SELinux context for web directory and PHP files
+- name: Set SELinux context for web directory and PHP files
+  remote_user: ec2-user
+  become: true
+  ansible.builtin.command:
+    cmd: |
+      sudo chcon -R -t httpd_sys_content_t /var/www/html
+      sudo chcon -R -t httpd_sys_rw_content_t /var/www/html
+
+# Generate a new APP_KEY if missing or invalid
+- name: Generate a new APP_KEY if missing or invalid
+  remote_user: ec2-user
+  become: true
+  ansible.builtin.command:
+    cmd: php artisan key:generate
+  args:
+    chdir: /var/www/html
+
+# Clear the configuration cache
+- name: Clear the configuration cache
+  remote_user: ec2-user
+  become: true
+  ansible.builtin.command:
+    cmd: php artisan config:cache
+  args:
+    chdir: /var/www/html
+
+# Ensure .env file and config directory have correct permissions
+- name: Ensure .env file and config directory have correct permissions
+  remote_user: ec2-user
+  become: true
+  ansible.builtin.command:
+    cmd: |
+      sudo chown -R apache:apache /var/www/html/
+      sudo chmod -R 775 /var/www/html/
+
+# Restart the web server and PHP-FPM
+- name: Restart the web server and PHP-FPM
+  remote_user: ec2-user
+  become: true
+  ansible.builtin.command:
+    cmd: |
+      sudo systemctl restart httpd
+      sudo systemctl restart php-fpm
