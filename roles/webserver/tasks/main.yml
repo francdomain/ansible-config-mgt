@@ -211,19 +211,29 @@
     chdir: /var/www/html
 
 # Ensure .env file and config directory have correct permissions
-- name: Ensure .env file and config directory have correct permissions
+- name: Ensure .env file and config directory have correct permissions - chown
   remote_user: ec2-user
   become: true
   ansible.builtin.command:
-    cmd: |
-      sudo chown -R apache:apache /var/www/html/
-      sudo chmod -R 775 /var/www/html/
+    cmd: chown -R apache:apache /var/www/html/
+
+- name: Ensure .env file and config directory have correct permissions - chmod
+  remote_user: ec2-user
+  become: true
+  ansible.builtin.command:
+    cmd: chmod -R 775 /var/www/html/
 
 # Restart the web server and PHP-FPM
-- name: Restart the web server and PHP-FPM
+- name: Restart the web server
   remote_user: ec2-user
   become: true
-  ansible.builtin.command:
-    cmd: |
-      sudo systemctl restart httpd
-      sudo systemctl restart php-fpm
+  ansible.builtin.service:
+    name: httpd
+    state: restarted
+
+- name: Restart PHP-FPM
+  remote_user: ec2-user
+  become: true
+  ansible.builtin.service:
+    name: php-fpm
+    state: restarted
