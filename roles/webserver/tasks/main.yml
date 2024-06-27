@@ -92,7 +92,7 @@
   remote_user: ec2-user
   become: true
   ansible.builtin.get_url:
-    url: http://44.202.32.100:8082/artifactory/Todo-artifact-local/php-todo.zip
+    url: http://54.147.134.46:8082/artifactory/Todo-artifact-local/php-todo.zip
     dest: /home/ec2-user/php-todo.zip
     url_username: admin
     url_password: Admin123$
