@@ -8,4 +8,4 @@
 172.31.94.192 ansible_ssh_user='ubuntu'
 
 # [artifactory]
-# 172.31.82.153 ansible_ssh_user='ubuntu'
+172.31.82.153 ansible_ssh_user='ubuntu'
