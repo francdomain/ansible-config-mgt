@@ -39,15 +39,15 @@ pipeline {
                         // Nginx server
                         // 'ubuntu@172.31.89.253',
                         // DB Server
-                        'ubuntu@172.31.91.227',
+                        // 'ubuntu@172.31.91.227',
                         // Webserver 1
                         // 'ec2-user@172.31.81.236',
                         // Webserver 2
                         // 'ec2-user@172.31.85.118'
                         // Artifactory server
-                        'ubuntu@172.31.82.153',
+                        // 'ubuntu@172.31.82.153',
                         // Todo server
-                        'ec2-user@172.31.95.216',
+                        // 'ec2-user@172.31.95.216',
                         // Sonarqube server
                         'ubuntu@172.31.94.192'
                     ]
