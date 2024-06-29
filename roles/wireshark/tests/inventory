@@ -1,4 +1,2 @@
-#localhost
-
 [wireshark]
 172.31.81.54 ansible_ssh_user='ubuntu'
