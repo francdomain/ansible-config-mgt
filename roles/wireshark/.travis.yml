@@ -8,7 +8,7 @@ dist: trusty
 #safelist
 branches:
   only:
-  - main
+  - master
   - stable
   - testing
 
