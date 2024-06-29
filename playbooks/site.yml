@@ -7,6 +7,11 @@
       tags:
         - always
 
+- name: Pentest assignment
+  import_playbook: ../static-assignments/wireshark.yml
+  tags:
+    - wireshark
+
 # - import_playbook: ../static-assignments/common.yml
 
 # - name: tooling assignment
@@ -24,17 +29,17 @@
 #   tags:
 #     - db
 
-- name: Artifactory assignment
-  import_playbook: ../static-assignments/artifactory.yml
-  tags:
-    - artifactory
+# - name: Artifactory assignment
+#   import_playbook: ../static-assignments/artifactory.yml
+#   tags:
+#     - artifactory
 
-- name: Todo deployment assignment
-  import_playbook: ../static-assignments/deploy.yml
-  tags:
-    - deployment
+# - name: Todo deployment assignment
+#   import_playbook: ../static-assignments/deploy.yml
+#   tags:
+#     - deployment
 
-- name: Sonarqube assignment
-  import_playbook: ../static-assignments/sonarqube.yml
-  tags:
-    - sonarqube
+# - name: Sonarqube assignment
+#   import_playbook: ../static-assignments/sonarqube.yml
+#   tags:
+#     - sonarqube
