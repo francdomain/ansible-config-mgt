@@ -1,11 +1,5 @@
-# ---
-# - hosts: localhost
-#   remote_user: root
-#   roles:
-#     - ansible-role-wireshark
-
 ---
-- hosts: wireshark
+- hosts: localhost
+  remote_user: root
   roles:
-     - wireshark
-  become: true
+    - ansible-role-wireshark
