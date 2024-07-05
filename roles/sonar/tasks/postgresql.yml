@@ -21,7 +21,7 @@
     name: postgresql
     state: started
     enabled: yes
-     
+
 
 - name: create password for user postgres
   ansible.builtin.user:
@@ -34,8 +34,6 @@
   community.postgresql.postgresql_db:
     name: sonarqube
     encoding: UTF-8
-
-   
 
 - name: Create user sonarqube
   become_user: postgres

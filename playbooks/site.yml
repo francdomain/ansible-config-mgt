@@ -7,6 +7,11 @@
       tags:
         - always
 
+# - name: Sonarqube assignment
+#   import_playbook: ../static-assignments/sonarqube.yml
+#   tags:
+#     - sonarqube
+
 - name: Pentest assignment
   import_playbook: ../static-assignments/wireshark.yml
   tags:
@@ -38,8 +43,3 @@
 #   import_playbook: ../static-assignments/deploy.yml
 #   tags:
 #     - deployment
-
-# - name: Sonarqube assignment
-#   import_playbook: ../static-assignments/sonarqube.yml
-#   tags:
-#     - sonarqube
